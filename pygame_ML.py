@@ -641,14 +641,14 @@ class Easy_Game :
             for i in range(Fixel_array.shape[0]):
                 for j in range(Fixel_array.shape[1]):
                     if random.randint(0, 40) == 0:
-                        Fixel_array[i][j] = 1
+                        Fixel_array[i][j] = 3
             player_position = (
             np.where(Fixel_array == 0)[0][random.sample(range(np.where(Fixel_array == 0)[0].shape[0]), 1)[0]],
             np.where(Fixel_array == 0)[1][random.sample(range(np.where(Fixel_array == 0)[0].shape[0]), 1)[0]])
             Fixel_array[player_position[0]][player_position[1]] = 2
             Feed_position = (np.where(Fixel_array == 0)[0][random.sample(range(np.where(Fixel_array == 0)[0].shape[0]), 1)[0]],
             np.where(Fixel_array == 0)[1][random.sample(range(np.where(Fixel_array == 0)[0].shape[0]), 1)[0]])
-            Fixel_array[Feed_position[0]][Feed_position[1]] = -1
+            Fixel_array[Feed_position[0]][Feed_position[1]] = 1
             return Fixel_array
         self.reward = 0
         self.Fixel_array = reset_position()
@@ -660,83 +660,80 @@ class Easy_Game :
             Feed_position = (
             np.where(self.Fixel_array == 0)[0][random.sample(range(np.where(self.Fixel_array == 0)[0].shape[0]), 1)[0]],
             np.where(self.Fixel_array == 0)[1][random.sample(range(np.where(self.Fixel_array == 0)[0].shape[0]), 1)[0]])
-            self.Fixel_array[Feed_position[0]][Feed_position[1]] = -1
+            self.Fixel_array[Feed_position[0]][Feed_position[1]] = 1
         try :
             player_position = (np.where(self.Fixel_array == 2)[0][0], np.where(self.Fixel_array == 2)[1][0])
+            self.reward = 0
             # up
             if action == 0:
                 if player_position[1] == 0:
                     self.done = True
-                    self.reward = 0
+                    self.reward = -1
                 else:
-                    if self.Fixel_array[player_position[0]][player_position[1] - 1] == 1:
+                    if self.Fixel_array[player_position[0]][player_position[1] - 1] == 3:
                         self.done = True
-                        self.reward = 0
-                    elif self.Fixel_array[player_position[0]][player_position[1] - 1] == -1:
+                        self.reward = -1
+                    elif self.Fixel_array[player_position[0]][player_position[1] - 1] == 1:
                         self.Fixel_array[player_position[0]][player_position[1] - 1] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
                         reset_feed_position()
-                        self.reward = 100
+                        self.reward = 1
                         self.done = True
                     else:
                         self.Fixel_array[player_position[0]][player_position[1] - 1] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
-                        self.reward = +1
             elif action == 1:
                 if player_position[0] == 39:
                     self.done = True
-                    self.reward = 0
+                    self.reward = -1
                 else:
-                    if self.Fixel_array[player_position[0] + 1][player_position[1]] == 1:
+                    if self.Fixel_array[player_position[0] + 1][player_position[1]] == 3:
                         self.done = True
-                        self.reward = 0
-                    elif self.Fixel_array[player_position[0] + 1][player_position[1]] == -1:
+                        self.reward = -1
+                    elif self.Fixel_array[player_position[0] + 1][player_position[1]] == 1:
                         self.Fixel_array[player_position[0] + 1][player_position[1]] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
                         reset_feed_position()
-                        self.reward = 100
+                        self.reward = 1
                         self.done = True
                     else:
                         self.Fixel_array[player_position[0] + 1][player_position[1]] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
-                        self.reward = +1
 
             elif action == 2:
                 if player_position[1] == 29:
                     self.done = True
-                    self.reward = 0
+                    self.reward = -1
                 else:
-                    if self.Fixel_array[player_position[0]][player_position[1] + 1] == 1:
+                    if self.Fixel_array[player_position[0]][player_position[1] + 1] == 3:
                         self.done = True
-                        self.reward = 0
-                    elif self.Fixel_array[player_position[0]][player_position[1] + 1] == -1:
+                        self.reward = -1
+                    elif self.Fixel_array[player_position[0]][player_position[1] + 1] == 1:
                         self.Fixel_array[player_position[0]][player_position[1] + 1] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
                         reset_feed_position()
-                        self.reward = 100
+                        self.reward = 1
                         self.done = True
                     else:
                         self.Fixel_array[player_position[0]][player_position[1] + 1] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
-                        self.reward = 1
             else:
                 if player_position[0] == 0:
                     self.done = True
-                    self.reward = 0
+                    self.reward = -1
                 else:
-                    if self.Fixel_array[player_position[0] - 1][player_position[1]] == 1:
+                    if self.Fixel_array[player_position[0] - 1][player_position[1]] == 3:
                         self.done = True
-                        self.reward = 0
-                    elif self.Fixel_array[player_position[0] - 1][player_position[1]] == -1:
+                        self.reward = -1
+                    elif self.Fixel_array[player_position[0] - 1][player_position[1]] == 1:
                         self.Fixel_array[player_position[0] - 1][player_position[1]] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
                         reset_feed_position()
-                        self.reward = 100
+                        self.reward = 1
                         self.done = True
                     else:
                         self.Fixel_array[player_position[0] - 1][player_position[1]] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
-                        self.reward = 1
 
             return (self.Fixel_array.reshape(1, 1200), self.reward, self.done)
         except :
@@ -783,11 +780,13 @@ def train () :
             # At early stage, e value has high value. This induces AI to do more exploration. and experience more divesity situation.
             # As Ai experiences more episode, e value has low value. This induces AI to follow its trained strategy.
             e = 1./((episode/10) + 1)
+            if e < 0.1:
+                e = 0.1
             done = False
             step_count = 0
             # After game is end, it is needed to reset all state data.
             # EX) player position, ddong position, feed position.
-            state = game.reset()
+            state = game.reset()/3
             reward = 0
             # loop while game is ended.
             while not done :
@@ -802,7 +801,7 @@ def train () :
                 if Return_value == None :
                     break
                 else :
-                    new_state = Return_value[0]
+                    new_state = Return_value[0]/3
                     reward = reward + Return_value[1]
                     done = Return_value[2]
 
@@ -825,7 +824,7 @@ def train () :
 
             if (episode % 10 == 0) & (episode >= 10):
                 for _ in range(50) :
-                    minibatch = random.sample(replay_buffer,10)
+                    minibatch = random.sample(replay_buffer,50)
                     loss,_ = DQN.replay_train(mainDQN,targetDQN,minibatch,dis = 0.9)
                 print("Loss : ",loss)
                 # run copy_ops object
