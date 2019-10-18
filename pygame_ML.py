@@ -21,6 +21,8 @@ RED = (255,0,0)
 player_size = (20,20)
 ddong_size = (20,20)
 feed_size = (20,20)
+
+
 class Player():
     def __init__(self,x,y, size = (20,20),screen_size = (800,600),hitbox = False,detection_hitbox = False,AI = False):
         img_directory = os.getcwd() + '\img/'
@@ -29,6 +31,7 @@ class Player():
         self.x_speed = 0
         self.y_speed = 0
         self.acceleration = 2
+        # if i train my ai, i don't have to load img file.
         if AI == False :
             self.image = pg.image.load(img_directory+"space-invaders.png")
             self.image = pg.transform.scale(self.image,size)
@@ -41,6 +44,7 @@ class Player():
         self.size = size
         self.screen_size = screen_size
 
+    # draw object
     def draw(self,screen = None):
         screen.blit(self.image, (self.x, self.y))
         if  self.hitbox_on == True :
@@ -51,7 +55,7 @@ class Player():
             height = 500
             detection_hitbox = (self.x-width/2,self.y-height/2,width,height)
             pg.draw.rect(screen, GREEN, detection_hitbox, 2)
-
+    # Difficult game control
     def AI_control(self,action_number,acceleration=2):
         if action_number == 0:
             self.y_speed += acceleration
@@ -69,6 +73,8 @@ class Player():
             self.x += self.x_speed
             self.y += self.y_speed
             return
+
+    # Easy game control
     def Easy_AI_control(self,action_number):
         if action_number == 0:
             self.y += 1
@@ -85,6 +91,7 @@ class Player():
         else :
             return False
 
+    # giving control to human
     def human_control(self,acceleration = 2):
         for event in pg.event.get():
             # if i click close button(quit), loop ended.
@@ -122,6 +129,7 @@ class Player():
             self.y += self.y_speed
             return False
 
+    # Easy game
     def Easy_human_control(self):
         for event in pg.event.get():
             # if i click close button(quit), loop ended.
@@ -157,6 +165,8 @@ class Player():
         else :
             return False
 
+# Ddong(meteor) object
+# player should evade from this object
 class Ddong() :
     def __init__(self,x,y,size = (20,20),screen_size = (800,600)  ,AI = False):
         self.x = x
@@ -171,6 +181,8 @@ class Ddong() :
             hitbox = (self.x, self.y, self.size[0] - 2, self.size[1] - 2)
             pg.draw.rect(screen,(255,0,0),hitbox,2)
 
+# Feed object
+# player should eat this object
 class Feed() :
     def __init__(self,x, y,
                  size = (20,20), screen = None,screen_size = (800,600),AI = False):
@@ -186,8 +198,7 @@ class Feed() :
             hitbox = (self.x, self.y, self.size[0] - 2, self.size[1] - 2)
             pg.draw.rect(screen,BLUE,hitbox,2)
 
-
-
+# Determine whether objects hit each other.
 def determine_crash(player_hitbox,ddong_hitbox,center = True) :
     def crash_true(corner_position) :
         if ((corner_position[0] < ddong_hitbox[0]+ddong_hitbox[2]/2) & (corner_position[0] > ddong_hitbox[0]-ddong_hitbox[2]/2)) & \
@@ -196,6 +207,7 @@ def determine_crash(player_hitbox,ddong_hitbox,center = True) :
             return True
         else:
             return False
+    # for easy mode
     if center == True :
         if (player_hitbox[0] == ddong_hitbox[0]) & (player_hitbox[1]== ddong_hitbox[1]) :
             return True
@@ -220,6 +232,12 @@ def determine_crash(player_hitbox,ddong_hitbox,center = True) :
             corner_position = (player_hitbox[0] - player_hitbox[2] / 2, player_hitbox[1] - player_hitbox[3] / 2)
             return crash_true(corner_position)
 
+# Difficult game object.
+# player is controlled by acceleration.
+# more like real environment.
+# If you want to play this game,
+    # game = Difficult_Game()
+    # game.play_game()
 class Difficult_Game :
     def __init__(self, show_screen=True, screen_size=(800, 600)):
         self.screen_size = screen_size
@@ -235,10 +253,12 @@ class Difficult_Game :
             self.background = pg.transform.scale(pg.image.load(img_directory + 'images.jpg'), self.screen_size)
         # size에 맞춰서 창을 보여줌
 
+    # render hitmap state (center x, center y, width, height)
     def render_hitmap_state(self,object):
         return (object.x + object.size[0] / 2, object.y + object.size[1] / 2,
                 object.size[0], object.size[1])
 
+    # render text box state (surface data, position data)
     def render_text(self,text, x=screen_size[0] / 2, y=screen_size[1] / 2, font_size=115, color=BLACK):
         def text_objects(text, font, color=BLACK):
             textSurface = font.render(text, True, color)
@@ -249,6 +269,7 @@ class Difficult_Game :
         TextRect.center = (x, y)
         return Textsurf, TextRect
 
+    # show intro or end menu
     def Show_menu(self, show_intro=True, Text_box_list=[], done=False):
         Show_intro = show_intro
         while Show_intro:
@@ -265,6 +286,7 @@ class Difficult_Game :
                     pg.quit()
             pg.display.update()
 
+    # For playing.
     def play_game(self,show_intro = True,show_retry = True,hitbox = False,clock_tick = 10):
         feed_count = 0
         ddong_list = []
@@ -318,6 +340,8 @@ class Difficult_Game :
                 score = 0
             pg.display.update()
 
+    # This function is needed for AI training.
+    # After render Array data (This array include Ddong position, player position, feed position), I can give data to AI.
     def Ddong_position_array(self,object_list):
         Fixel_array = np.zeros((40, 30))
         for object in object_list:
@@ -326,6 +350,8 @@ class Difficult_Game :
             Fixel_array[x][y] = 1
         return Fixel_array.reshape(1,1200)
 
+    # for see the ai performance.
+    # not fully implemented
     def Show_AI_play(self,model,show_retry = False):
         feed_count = 0
         s = self.reset()
@@ -376,6 +402,8 @@ class Difficult_Game :
                 self.score = 0
             pg.display.update()
 
+    # This function is needed for AI train.
+    # Reset all state data.
     def reset(self):
         self.player = Player(AI= True)
         self.feed = Feed(AI = True)
@@ -395,6 +423,11 @@ class Difficult_Game :
         return (np.hstack([ddong_position_array,player_position_array,player_speed_array,
                            feed_position_array]))
 
+    # This function is needed for AI training.
+    # After receiving action data, this function calculate output_data(new state, score, done)
+    # new state means next state.
+    # score means reward for each action.
+    # Done means that game is ended.
     def step(self,action):
         Is_Out = self.player.AI_control(action)
         player_hitbox = self.render_hitmap_state(self.player)
@@ -427,6 +460,13 @@ class Difficult_Game :
 
         return (np.hstack([ddong_position_array, player_position_array, player_speed_array,
                            feed_position_array]), self.score, self.done)
+
+# Because Ai couldn't learn the difficult game algorithm, i made a more easy game.
+# This game don't use acceleration concept to determine position of player.
+# At each action, player moves just one pixel.
+# If you want to play this game
+# game = Easy_Game()
+# game.play_game()
 
 class Easy_Game :
     def __init__(self,show_screen = True,screen_size = (800, 600)):
@@ -486,8 +526,6 @@ class Easy_Game :
             Fixel_array[player_position[0]][player_position[1]] = 1
             player = Player(x=player_position[0] * 20, y=player_position[1] * 20)
             return Fixel_array,ddong_list ,player
-
-
         feed_count = 0
         ddong_list = []
         score = 0
@@ -629,78 +667,92 @@ class Easy_Game :
             if action == 0:
                 if player_position[1] == 0:
                     self.done = True
+                    self.reward = 0
                 else:
                     if self.Fixel_array[player_position[0]][player_position[1] - 1] == 1:
                         self.done = True
+                        self.reward = 0
                     elif self.Fixel_array[player_position[0]][player_position[1] - 1] == -1:
                         self.Fixel_array[player_position[0]][player_position[1] - 1] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
                         reset_feed_position()
-                        self.reward += 1
+                        self.reward = 100
                         self.done = True
                     else:
                         self.Fixel_array[player_position[0]][player_position[1] - 1] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
+                        self.reward = +1
             elif action == 1:
                 if player_position[0] == 39:
                     self.done = True
+                    self.reward = 0
                 else:
                     if self.Fixel_array[player_position[0] + 1][player_position[1]] == 1:
                         self.done = True
+                        self.reward = 0
                     elif self.Fixel_array[player_position[0] + 1][player_position[1]] == -1:
                         self.Fixel_array[player_position[0] + 1][player_position[1]] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
                         reset_feed_position()
-                        self.reward += 1
+                        self.reward = 100
                         self.done = True
                     else:
                         self.Fixel_array[player_position[0] + 1][player_position[1]] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
+                        self.reward = +1
 
             elif action == 2:
                 if player_position[1] == 29:
                     self.done = True
+                    self.reward = 0
                 else:
                     if self.Fixel_array[player_position[0]][player_position[1] + 1] == 1:
                         self.done = True
+                        self.reward = 0
                     elif self.Fixel_array[player_position[0]][player_position[1] + 1] == -1:
                         self.Fixel_array[player_position[0]][player_position[1] + 1] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
                         reset_feed_position()
-                        self.reward += 1
+                        self.reward = 100
                         self.done = True
                     else:
                         self.Fixel_array[player_position[0]][player_position[1] + 1] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
+                        self.reward = 1
             else:
                 if player_position[0] == 0:
                     self.done = True
+                    self.reward = 0
                 else:
                     if self.Fixel_array[player_position[0] - 1][player_position[1]] == 1:
                         self.done = True
+                        self.reward = 0
                     elif self.Fixel_array[player_position[0] - 1][player_position[1]] == -1:
                         self.Fixel_array[player_position[0] - 1][player_position[1]] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
                         reset_feed_position()
-                        self.reward += 1
+                        self.reward = 100
                         self.done = True
                     else:
                         self.Fixel_array[player_position[0] - 1][player_position[1]] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
+                        self.reward = 1
 
             return (self.Fixel_array.reshape(1, 1200), self.reward, self.done)
         except :
             return None
 
 def main () :
-    game =  Difficult_Game()
+    game =  Easy_Game()
     game.play_game()
 
 
+# This function uses DQN algorithm
+#
 def train () :
-    max_episodes = 15000
+    max_episodes = 150000
     REPLAY_MEMORY = 50000
-    # 양방향 que
+    # Save play data to this buffer.
     replay_buffer = deque()
 
     game = Easy_Game(show_screen=False)
@@ -710,61 +762,78 @@ def train () :
     # 0 : up, 1 : right, 2 : down, 3 : left  => clockwise
     action_list = [0,1,2,3]
     with tf.Session() as sess :
+        # mainDQN is neuron network model.
+        # I train this model.
         mainDQN = DQN.DQN(sess,input_size, output_size,name = "main")
+
+        # targetDQN is also neuron network model
+        # After targetDQN experiences new state, it gives advice to mainDQN.
         targetDQN =DQN.DQN(sess,input_size,output_size,name = "Target")
+
+        # Initializing all weight values.
         tf.global_variables_initializer().run()
+
+        # create copy_ops object.
+        # This object assign mainDQN's weight to targetDQN's weight
         copy_ops = DQN.get_copy_var_ops(dest_scope_name= "Target",
                                     src_scope_name = "main")
         reward_count = 0
         for episode in range(max_episodes) :
+            # e value is needed for randomness.
+            # At early stage, e value has high value. This induces AI to do more exploration. and experience more divesity situation.
+            # As Ai experiences more episode, e value has low value. This induces AI to follow its trained strategy.
             e = 1./((episode/10) + 1)
             done = False
             step_count = 0
+            # After game is end, it is needed to reset all state data.
+            # EX) player position, ddong position, feed position.
             state = game.reset()
             reward = 0
+            # loop while game is ended.
             while not done :
+                # Determine either exploit or exploration.
                 if np.random.rand(1) < e :
                     action = random.sample(action_list,1)[0]
                 else :
                     action = np.argmax(mainDQN.predict(state))
+                # Return_value is tuple
+                # Return_value = (new_state, reward, done)
                 Return_value = game.step(action)
                 if Return_value == None :
                     break
                 else :
                     new_state = Return_value[0]
-                    reward = Return_value[1]
+                    reward = reward + Return_value[1]
                     done = Return_value[2]
 
-                # print("action " ,action)
-                # print("state  : " ,state[0,-6:])
-                # print("next step : " ,next_state[0,-6:])
-                # print("reward  : ", reward)
-                # print("done :",done)
-                # print("step : " ,step_count)
+                # Add play data to replay_buffer
                 replay_buffer.append((state,action,reward,new_state,done))
                 if len(replay_buffer) > REPLAY_MEMORY :
                     replay_buffer.popleft()
                 state = new_state
                 step_count += 1
-                if  step_count > 10000 :
+                # For blocking infinite loop
+                if  step_count > 20000 :
                     break
-            if reward > 0 :
-                reward_count += 1
-
             print("Episode : {} steps : {}".format(episode,step_count))
-            print("reward : ",reward_count)
-            if step_count > 10000 :
+            print("reward : ",reward)
+            if step_count > 30000 :
                 pass
+
+            # At every cycle(10 episode), it make random batch data from replay buffer.
+            # This algorithm is need for generalization.
+
             if (episode % 10 == 0) & (episode >= 10):
                 for _ in range(50) :
                     minibatch = random.sample(replay_buffer,10)
                     loss,_ = DQN.replay_train(mainDQN,targetDQN,minibatch,dis = 0.9)
                 print("Loss : ",loss)
+                # run copy_ops object
                 sess.run(copy_ops)
         save_file = 'model_folder/model.ckpt'
-        saver = tf.compat.v1.train.Saver()
+        saver = tf.train.Saver()
         saver.save(sess,save_file)
-
+#main()
 train()
 
 
