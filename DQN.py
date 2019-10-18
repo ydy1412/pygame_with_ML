@@ -1,6 +1,12 @@
 import tensorflow as tf
 import numpy as np
 import random
+
+# DQN class
+# DQN has session variable.
+# To create DQN model, excute "dqn = DQN(session, input_shape, output_shape)"
+# To predict output, excute "dqn.predict(input_data)"
+# To update DQN model, excute "dqn.update(input_data,y_data)
 class DQN :
     def __init__(self,session,input_size,output_size,name = "main"):
         self.session = session
@@ -35,6 +41,7 @@ class DQN :
     def update(self , x_stack, y_stack):
         return self.session.run([self._loss,self._train],feed_dict ={self._X:x_stack,self._Y :y_stack})
 
+# For batch train.
 def replay_train(mainDQN,targetDQN,train_batch,dis):
     # 0 크기의 numpy array를 만듬
     x_stack = np.empty(0).reshape(0,mainDQN.input_size)
@@ -51,6 +58,7 @@ def replay_train(mainDQN,targetDQN,train_batch,dis):
         x_stack = np.vstack([x_stack,state])
     return mainDQN.update(x_stack,y_stack)
 
+# Copy variables of model and put into list.
 def get_copy_var_ops(*,dest_scope_name = "target",src_scope_name = "main") :
     op_holder = []
     # get_collection에 scope 이름을 주면 모든 변수들을 가져옴
