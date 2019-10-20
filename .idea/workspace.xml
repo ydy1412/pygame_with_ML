@@ -4,7 +4,10 @@
     <list default="true" id="da039539-f601-4ff2-8f5b-7525890ad533" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DQN.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQN.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.txt" beforeDir="false" afterPath="$PROJECT_DIR$/README.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_folder/checkpoint" beforeDir="false" afterPath="$PROJECT_DIR$/model_folder/checkpoint" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_folder/model.ckpt.data-00000-of-00001" beforeDir="false" afterPath="$PROJECT_DIR$/model_folder/model.ckpt.data-00000-of-00001" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_folder/model.ckpt.index" beforeDir="false" afterPath="$PROJECT_DIR$/model_folder/model.ckpt.index" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_folder/model.ckpt.meta" beforeDir="false" afterPath="$PROJECT_DIR$/model_folder/model.ckpt.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pygame_ML.py" beforeDir="false" afterPath="$PROJECT_DIR$/pygame_ML.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -155,22 +158,22 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pygame_ML.py</url>
-          <line>201</line>
+          <line>213</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pygame_ML.py</url>
-          <line>240</line>
+          <line>259</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pygame_ML.py</url>
-          <line>25</line>
+          <line>27</line>
           <option name="timeStamp" value="9" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pygame_ML.py</url>
-          <line>58</line>
+          <line>62</line>
           <option name="timeStamp" value="10" />
         </line-breakpoint>
       </breakpoints>

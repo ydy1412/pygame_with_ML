@@ -734,6 +734,7 @@ class Easy_Game :
                     else:
                         self.Fixel_array[player_position[0] - 1][player_position[1]] = 2
                         self.Fixel_array[player_position[0]][player_position[1]] = 0
+                        self.reward = -0.1
 
             return (self.Fixel_array.reshape(1, 1200), self.reward, self.done)
         except :
@@ -747,7 +748,7 @@ def main () :
 # This function uses DQN algorithm
 #
 def train () :
-    max_episodes = 150000
+    max_episodes = 15000
     REPLAY_MEMORY = 50000
     # Save play data to this buffer.
     replay_buffer = deque()
@@ -802,7 +803,7 @@ def train () :
                     break
                 else :
                     new_state = Return_value[0]/3
-                    reward = reward + Return_value[1]
+                    reward = Return_value[1]
                     done = Return_value[2]
 
                 # Add play data to replay_buffer
@@ -812,16 +813,13 @@ def train () :
                 state = new_state
                 step_count += 1
                 # For blocking infinite loop
-                if  step_count > 20000 :
-                    break
             print("Episode : {} steps : {}".format(episode,step_count))
-            print("reward : ",reward)
+
             if step_count > 30000 :
                 pass
 
             # At every cycle(10 episode), it make random batch data from replay buffer.
             # This algorithm is need for generalization.
-
             if (episode % 10 == 0) & (episode >= 10):
                 for _ in range(50) :
                     minibatch = random.sample(replay_buffer,50)
@@ -829,6 +827,7 @@ def train () :
                 print("Loss : ",loss)
                 # run copy_ops object
                 sess.run(copy_ops)
+
         save_file = 'model_folder/model.ckpt'
         saver = tf.train.Saver()
         saver.save(sess,save_file)
