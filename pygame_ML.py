@@ -43,18 +43,31 @@ class Player():
         self.key_state = False
         self.size = size
         self.screen_size = screen_size
+        self.sensor_array = [False for i in range(17
+                                                  )]
 
     # draw object
-    def draw(self,screen = None):
+    def draw(self,screen = None, sensor = False):
         screen.blit(self.image, (self.x, self.y))
         if  self.hitbox_on == True :
             hitbox = (self.x, self.y, self.size[0] - 2, self.size[1] - 2)
             pg.draw.rect(screen, (255, 0, 0), hitbox, 2)
         if self.detection_hitbox_on == True :
-            width = 300
-            height = 500
-            detection_hitbox = (self.x-width/2,self.y-height/2,width,height)
-            pg.draw.rect(screen, GREEN, detection_hitbox, 2)
+            detection_hitbox = (int(self.x+self.size[0]/2),int(self.y+self.size[1]/2))
+            pg.draw.circle(screen, GREEN, detection_hitbox, 300, 1)
+        if sensor == True :
+            # radian per 10 degree
+            theta = np.pi/180 * 10.
+            start_pos = (int(self.x+self.size[0]/2),int(self.y+self.size[1]/2))
+            R = 300
+            for i in range(0,17) :
+                # line(surface, color, start_pos, end_pos, width)
+                end_pos = (self.x++self.size[0]/2+300 * np.cos(theta * (i + 1)), self.y+self.size[1]/2-300 * np.sin(theta * (i + 1)))
+                if self.sensor_array[i] == True :
+                    pg.draw.line(screen,RED,end_pos,start_pos,1)
+                else :
+                    pg.draw.line(screen,BLUE,end_pos,start_pos,1)
+
     # Difficult game control
     def AI_control(self,action_number,acceleration=2):
         if action_number == 0:
@@ -201,8 +214,8 @@ class Feed() :
 # Determine whether objects hit each other.
 def determine_crash(player_hitbox,ddong_hitbox,center = True) :
     def crash_true(corner_position) :
-        if ((corner_position[0] < ddong_hitbox[0]+ddong_hitbox[2]/2) & (corner_position[0] > ddong_hitbox[0]-ddong_hitbox[2]/2)) & \
-                ((corner_position[1] < ddong_hitbox[1] + ddong_hitbox[3] / 2) & (
+        if ((corner_position[0] <= ddong_hitbox[0]+ddong_hitbox[2]/2) & (corner_position[0] >= ddong_hitbox[0]-ddong_hitbox[2]/2)) & \
+                ((corner_position[1] <= ddong_hitbox[1] + ddong_hitbox[3] / 2) & (
                         corner_position[1] >= ddong_hitbox[1] - ddong_hitbox[3] / 2)) :
             return True
         else:
@@ -243,9 +256,7 @@ class Difficult_Game :
         self.screen_size = screen_size
         self.score = 0
         self.downfall_speed = 20
-        self.done = False
-        Show_screen = show_screen
-        if Show_screen == True:
+        if show_screen == True:
             pg.init()
             self.clock = pg.time.Clock()
             pg.display.set_caption("Eat the food!")
@@ -271,8 +282,7 @@ class Difficult_Game :
 
     # show intro or end menu
     def Show_menu(self, show_intro=True, Text_box_list=[], done=False):
-        Show_intro = show_intro
-        while Show_intro:
+        while show_intro:
             self.screen.fill(WHITE)
             for Text_box in Text_box_list:
                 self.screen.blit(Text_box[0], Text_box[1])
@@ -280,49 +290,59 @@ class Difficult_Game :
                 # if i click close button(quit), loop ended.
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_RETURN:
-                        Show_intro = False
+                        show_intro = False
                         return False
                 if event.type == pg.QUIT:
                     pg.quit()
             pg.display.update()
 
     # For playing.
-    def play_game(self,show_intro = True,show_retry = True,hitbox = False,clock_tick = 10):
+    def play_game(self,show_intro = True,show_retry = False,hitbox = False,clock_tick = 10):
         feed_count = 0
         ddong_list = []
-        player = Player(x = 20,y = 400)
-        Show_intro = False
+        player = Player(x = 400,y = 580,hitbox = True, detection_hitbox= True)
         score = 0
+        self.done = False
         while not self.done:
-            self.screen.fill(WHITE)
             self.clock.tick(clock_tick)
-            if Show_intro == show_intro:
+            if show_intro == True:
                 Text_box_list = [self.render_text("GAME START")]
-                Show_intro = self.Show_menu(Text_box_list = Text_box_list)
+                show_intro = self.Show_menu(Text_box_list = Text_box_list)
             # fps를 10으로 하겠다고 설정.
             if feed_count == 0:
                 feed_count = 1
-                feed = Feed(x = random.randint(0,800),y = random.randint(0,600))
+                feed = Feed(x = random.randint(0,800),y = 580)
             for i in range(random.randint(0,2)):
                 ddong_list.append(Ddong(x=random.randint(0,800),y = 0))
 
-            self.done = player.human_control()
+            player.human_control()
+            if (player.x < 0) | (player.x + 20 > self.screen_size[0]) | (player.y < 0) | (player.y + 20 > self.screen_size[1]):
+                show_retry = True
+            else:
+                pass
             self.screen.fill(WHITE)
             self.screen.blit(self.background, (0, 0))
             feed.draw(screen = self.screen)
-            player.draw(screen = self.screen)
+            player.draw(screen = self.screen,sensor = True)
             feed_hitbox = self.render_hitmap_state(feed)
             player_hitbox = self.render_hitmap_state(player)
-            IsFeed = determine_crash(player_hitbox, feed_hitbox)
+            IsFeed = determine_crash(player_hitbox, feed_hitbox,center = False)
+
             if IsFeed == True :
                 feed_count = 0
                 score += 100
+            dangerous_object = 0
             for ddong in ddong_list:
                 # center point, width, height
-                if ddong.y >= self.screen_size[1] - 20:
+                if ddong.y >= self.screen_size[1]:
                     score += 1
                     ddong_list.remove(ddong)
-                else:
+                else :
+                    distance = np.sqrt((player.x-ddong.x)**2+(player.y-ddong.y)**2)
+                    if distance < 300 :
+                        vector = (ddong.x-player.x,ddong.y-player.y)
+                        dangerous_object += 1
+                        print(dangerous_object)
                     ddong.y += self.downfall_speed
                     ddong_hitbox = self.render_hitmap_state(ddong)
                     IsCrash = determine_crash(player_hitbox, ddong_hitbox,center = False)
@@ -336,7 +356,8 @@ class Difficult_Game :
                 Text_box_list = [self.render_text("GAME OVER"), self.render_text("SCORE :" + str(score), x =self.screen_size[0] - 100, y = 50, font_size = 30, color = BLACK)]
                 show_retry = self.Show_menu(Text_box_list = Text_box_list)
                 ddong_list = []
-                player = Player(x = 20,y = 400)
+                player = Player(x = 400,y = 580,hitbox = True, detection_hitbox= True)
+                feed = Feed(x=random.randint(0, 800), y=580)
                 score = 0
             pg.display.update()
 
@@ -379,7 +400,7 @@ class Difficult_Game :
                 score += 100
             for ddong in ddong_list:
                 # center point, width, height
-                if ddong.y >= self.screen_size[1] - 20:
+                if ddong.y >= self.screen_size[1]:
                     score += 1
                     ddong_list.remove(ddong)
                 else:
@@ -398,6 +419,7 @@ class Difficult_Game :
                                  render_text("SCORE :" + str(score), x=screen_size[0] - 100, y=50, font_size=30,
                                              color=BLACK)]
                 show_retry = self.Show_menu(Text_box_list=Text_box_list)
+
                 ddong_list = []
                 self.score = 0
             pg.display.update()
@@ -741,7 +763,7 @@ class Easy_Game :
             return None
 
 def main () :
-    game =  Easy_Game()
+    game =  Difficult_Game()
     game.play_game()
 
 
@@ -831,8 +853,8 @@ def train () :
         save_file = 'model_folder/model.ckpt'
         saver = tf.train.Saver()
         saver.save(sess,save_file)
-#main()
-train()
+main()
+#train()
 
 
 
