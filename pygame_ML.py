@@ -3,6 +3,7 @@ import os
 import numpy as np
 import random
 import DQN
+import gym
 import tensorflow as tf
 from collections import deque
 
@@ -43,12 +44,14 @@ class Player():
         self.key_state = False
         self.size = size
         self.screen_size = screen_size
-        self.sensor_array = [False for i in range(17
-                                                  )]
+        self.sensor_array = [False for i in range(19
+                                                  ) ]
+        self.sensor_vector_list = np.zeros((19,3))
 
     # draw object
     def draw(self,screen = None, sensor = False):
-        screen.blit(self.image, (self.x, self.y))
+        screen.blit(self.image, (self.x, self.
+                                 y))
         if  self.hitbox_on == True :
             hitbox = (self.x, self.y, self.size[0] - 2, self.size[1] - 2)
             pg.draw.rect(screen, (255, 0, 0), hitbox, 2)
@@ -60,13 +63,17 @@ class Player():
             theta = np.pi/180 * 10.
             start_pos = (int(self.x+self.size[0]/2),int(self.y+self.size[1]/2))
             R = 300
-            for i in range(0,17) :
+            for i in range(0,19) :
                 # line(surface, color, start_pos, end_pos, width)
-                end_pos = (self.x++self.size[0]/2+300 * np.cos(theta * (i + 1)), self.y+self.size[1]/2-300 * np.sin(theta * (i + 1)))
+                end_pos = (self.x+self.size[0]/2+300 * np.cos(theta * (i)), self.y+self.size[1]/2-300 * np.sin(theta * (i)))
                 if self.sensor_array[i] == True :
                     pg.draw.line(screen,RED,end_pos,start_pos,1)
                 else :
                     pg.draw.line(screen,BLUE,end_pos,start_pos,1)
+                # self.sensor_vector_list = (a,b,c) => ax+by+c = 0
+                self.sensor_vector_list[i] = [end_pos[1]-start_pos[1],start_pos[0]-end_pos[0],(start_pos[1]*end_pos[0]-end_pos[1]*start_pos[0])]
+
+
 
     # Difficult game control
     def AI_control(self,action_number,acceleration=2):
@@ -300,9 +307,10 @@ class Difficult_Game :
     def play_game(self,show_intro = True,show_retry = False,hitbox = False,clock_tick = 10):
         feed_count = 0
         ddong_list = []
-        player = Player(x = 400,y = 580,hitbox = True, detection_hitbox= True)
+        player = Player(x = 390,y = 580,hitbox = True, detection_hitbox= True)
         score = 0
         self.done = False
+        Quit_game = False
         while not self.done:
             self.clock.tick(clock_tick)
             if show_intro == True:
@@ -312,7 +320,7 @@ class Difficult_Game :
             if feed_count == 0:
                 feed_count = 1
                 feed = Feed(x = random.randint(0,800),y = 580)
-            for i in range(random.randint(0,2)):
+            for i in range(random.randint(0,1)):
                 ddong_list.append(Ddong(x=random.randint(0,800),y = 0))
 
             player.human_control()
@@ -332,23 +340,31 @@ class Difficult_Game :
                 feed_count = 0
                 score += 100
             dangerous_object = 0
+            player.sensor_array = [False for i in range(19)]
             for ddong in ddong_list:
                 # center point, width, height
                 if ddong.y >= self.screen_size[1]:
                     score += 1
                     ddong_list.remove(ddong)
                 else :
-                    distance = np.sqrt((player.x-ddong.x)**2+(player.y-ddong.y)**2)
-                    if distance < 300 :
-                        vector = (ddong.x-player.x,ddong.y-player.y)
-                        dangerous_object += 1
-                        print(dangerous_object)
+                    distance_from_player = np.sqrt((player.x-ddong.x)**2+(player.y-ddong.y)**2)
+                    if distance_from_player < 300 :
+                        Quit_game = True
+                        for i,sensor_vector in enumerate(player.sensor_vector_list) :
+                            # distance between point and line.
+                            d = abs(sensor_vector[0]*(ddong.x-player.x)+sensor_vector[1]*(-player.y+ddong.y))/\
+                                np.sqrt(sensor_vector[0]**2+sensor_vector[1]**2)
+
+                            if d <= 10 :
+                                player.sensor_array[i] = True
+
                     ddong.y += self.downfall_speed
                     ddong_hitbox = self.render_hitmap_state(ddong)
                     IsCrash = determine_crash(player_hitbox, ddong_hitbox,center = False)
                     if IsCrash == True :
                         show_retry = True
                 ddong.draw(screen = self.screen)
+
             score_box = self.render_text("SCORE :" + str(score), x =screen_size[0] - 100, y = 50, font_size = 30, color = WHITE)
             self.screen.blit(score_box[0], score_box[1])
             if show_retry == True :
@@ -360,6 +376,18 @@ class Difficult_Game :
                 feed = Feed(x=random.randint(0, 800), y=580)
                 score = 0
             pg.display.update()
+            # if Quit_game == True:
+            #     while Quit_game :
+            #         for event in pg.event.get():
+            #
+            #             if event.type == pg.KEYDOWN:
+            #                 if event.key == pg.K_RETURN:
+            #                     Quit_game = False
+            #
+            #             # gameDisplay.fill(white)
+            #
+            #         pg.display.update()
+            #         self.clock.tick(15)
 
     # This function is needed for AI training.
     # After render Array data (This array include Ddong position, player position, feed position), I can give data to AI.
@@ -372,7 +400,7 @@ class Difficult_Game :
         return Fixel_array.reshape(1,1200)
 
     # for see the ai performance.
-    # not fully implemented
+    # not fully implemented.
     def Show_AI_play(self,model,show_retry = False):
         feed_count = 0
         s = self.reset()
@@ -427,61 +455,103 @@ class Difficult_Game :
     # This function is needed for AI train.
     # Reset all state data.
     def reset(self):
-        self.player = Player(AI= True)
-        self.feed = Feed(AI = True)
-        self.ddong_list = []
-        self.score = 0
         self.done = False
-        self.IsFeed = False
-        for i in range(random.randint(0,2)):
-            self.ddong_list.append(Ddong(AI = True))
-        ddong_position_array = self.Ddong_position_array(self.ddong_list)
-        player_position_array = np.array([self.player.x/self.screen_size[0],
-                                          self.player.y/self.screen_size[1]]).reshape(1,2)
-        player_speed_array = np.array([self.player.x_speed/10.0,self.player.y_speed/10.0]).reshape(1,2)
-        feed_position_array = np.array([self.feed.x/self.screen_size[0],
-                                          self.feed.y/self.screen_size[1]]).reshape(1,2)
-
-        return (np.hstack([ddong_position_array,player_position_array,player_speed_array,
-                           feed_position_array]))
+        self.player_x = 390
+        self.player_y = 580
+        # speed x direction
+        self.player_u = 0
+        self.feed_x = random.randint(0,780)
+        self.feed_y = 580
+        self.downfall_speed = 10
+        if self.feed_x - self.player_x > 0 :
+            feed_position = 1.
+        elif self.feed_x - self.player_x < 0 :
+            feed_position = -1.
+        else :
+            feed_position = 0.
+        self.ddong_list = []
+        for i in range(random.randint(0, 1)):
+            self.ddong_list.append([random.randint(0, 780),0])
+        self.sensor_array = np.zeros((1,19))
+        return np.hstack([self.sensor_array,[[self.player_x/800]]])
 
     # This function is needed for AI training.
     # After receiving action data, this function calculate output_data(new state, score, done)
     # new state means next state.
     # score means reward for each action.
     # Done means that game is ended.
-    def step(self,action):
-        Is_Out = self.player.AI_control(action)
-        player_hitbox = self.render_hitmap_state(self.player)
-        feed_hitbox = self.render_hitmap_state(self.feed)
-        for i in range(random.randint(0,2)):
-            self.ddong_list.append(Ddong())
-        for ddong in self.ddong_list :
-            if ddong.y >= self.screen_size[1] - 20:
+    def step(self,action,acceleration = 0,speed = 0):
+        self.sensor_array = np.zeros((1, 19))
+        reward = 1
+        if acceleration != 0 :
+            if action == 2:
+                self.player_u += acceleration
+            elif action == 1:
+                self.player_u -= acceleration
+            else:
+                pass
+        else :
+            if action == 1:
+                self.player_u = speed
+            else :
+                self.player_u = -speed
+
+        self.player_x += self.player_u
+        if (self.player_x < 0) | (self.player_x > 800) :
+            self.done = True
+            reward = -100
+            print("out")
+        self.sensor_vector_list = np.zeros((19, 2))
+        theta = np.pi / 180 * 10.
+        start_pos = (int(self.player_x + 10), int(self.player_y + 10))
+        R = 300
+        for i in range(0, 19):
+            # line(surface, color, start_pos, end_pos, width)
+            end_pos = (self.player_x + 10 + R * np.cos(theta * (i)),
+                       self.player_y + 10 - R * np.sin(theta * (i)))
+            # self.sensor_vector_list = (a,b,c) => ax+by+c = 0
+            self.sensor_vector_list[i] = [end_pos[1] - start_pos[1], start_pos[0] - end_pos[0]]
+        player_hitbox = (self.player_x + 10, self.player_y + 10,
+                20, 20)
+        # feed_hitbox = (self.feed_x + 10, self.feed_y+10,20,20)
+        # IsFeed = determine_crash(player_hitbox,feed_hitbox)
+        # if self.feed_x - self.player_x > 0:
+        #     feed_position = 1.
+        # elif self.feed_x - self.player_x < 0:
+        #     feed_position = -1.
+        # else:
+        #     feed_position = 0.
+        #
+        # if IsFeed == True:
+        #     reward = 100
+        #     self.done = True
+        for i,_ in enumerate(self.ddong_list):
+            self.ddong_list[i][1] += self.downfall_speed
+            ddong = self.ddong_list[i]
+            # center point, width, height
+            if ddong[1] >= 600:
                 self.ddong_list.remove(ddong)
             else:
-                ddong.y += self.downfall_speed
-                ddong_hitbox = self.render_hitmap_state(ddong)
-                IsCrash = determine_crash(player_hitbox, ddong_hitbox)
-                if (IsCrash == True) | (Is_Out == True) :
+                distance_from_player = np.sqrt((self.player_x - ddong[0]) ** 2 + (self.player_y - ddong[1]) ** 2)
+                if distance_from_player < 300:
+                    for i, sensor_vector in enumerate(self.sensor_vector_list):
+                        # distance between point and line.
+                        d = abs(sensor_vector[0] * (ddong[0] - self.player_x) + sensor_vector[1] * (-self.player_y + ddong[1])) / \
+                            np.sqrt(sensor_vector[0] ** 2 + sensor_vector[1] ** 2)
+
+                        if d <= 10:
+                            self.sensor_array[0][i] = distance_from_player/300
+
+                ddong_hitbox = (ddong[0]+10,ddong[1]+10,20,20)
+                IsCrash = determine_crash(player_hitbox, ddong_hitbox, center=False)
+                if IsCrash == True:
+                    reward = -100
                     self.done = True
-                else :
-                    self.IsFeed = determine_crash(player_hitbox,feed_hitbox)
-                    if self.IsFeed == True :
-                        self.score += 10
-                        self.feed = Feed(AI = True)
-                        self.IsFeed = False
+        for i in range(random.randint(0, 1)):
+            self.ddong_list.append([random.randint(0, 780), 0])
 
-        self.score += 1
-        ddong_position_array = self.Ddong_position_array(self.ddong_list)
-        player_position_array = np.array([self.player.x / self.screen_size[0],
-                                          self.player.y / self.screen_size[1]]).reshape(1,2)
-        player_speed_array = np.array([self.player.x_speed / 10.0, self.player.y_speed / 10.0]).reshape(1,2)
-        feed_position_array = np.array([self.feed.x / self.screen_size[0],
-                                        self.feed.y / self.screen_size[1]]).reshape(1,2)
+        return (np.hstack([self.sensor_array,[[self.player_x/800]]]), reward , self.done)
 
-        return (np.hstack([ddong_position_array, player_position_array, player_speed_array,
-                           feed_position_array]), self.score, self.done)
 
 # Because Ai couldn't learn the difficult game algorithm, i made a more easy game.
 # This game don't use acceleration concept to determine position of player.
@@ -765,8 +835,6 @@ class Easy_Game :
 def main () :
     game =  Difficult_Game()
     game.play_game()
-
-
 # This function uses DQN algorithm
 #
 def train () :
@@ -774,13 +842,13 @@ def train () :
     REPLAY_MEMORY = 50000
     # Save play data to this buffer.
     replay_buffer = deque()
-
-    game = Easy_Game(show_screen=False)
-    input_size = 1200
-    output_size = 4
+    # game = gym.make('CartPole-v1')
+    game = Difficult_Game(show_screen=False)
+    input_size = 20
+    output_size = 2
 
     # 0 : up, 1 : right, 2 : down, 3 : left  => clockwise
-    action_list = [0,1,2,3]
+    action_list = [0,1,2]
     with tf.Session() as sess :
         # mainDQN is neuron network model.
         # I train this model.
@@ -788,14 +856,14 @@ def train () :
 
         # targetDQN is also neuron network model
         # After targetDQN experiences new state, it gives advice to mainDQN.
-        targetDQN =DQN.DQN(sess,input_size,output_size,name = "Target")
+        targetDQN =DQN.DQN(sess,input_size,output_size,name = "target")
 
         # Initializing all weight values.
         tf.global_variables_initializer().run()
 
         # create copy_ops object.
         # This object assign mainDQN's weight to targetDQN's weight
-        copy_ops = DQN.get_copy_var_ops(dest_scope_name= "Target",
+        copy_ops = DQN.get_copy_var_ops(dest_scope_name= "target",
                                     src_scope_name = "main")
         reward_count = 0
         for episode in range(max_episodes) :
@@ -809,42 +877,36 @@ def train () :
             step_count = 0
             # After game is end, it is needed to reset all state data.
             # EX) player position, ddong position, feed position.
-            state = game.reset()/3
-            reward = 0
+            state = game.reset()
+            total_reward = 0
             # loop while game is ended.
             while not done :
                 # Determine either exploit or exploration.
                 if np.random.rand(1) < e :
-                    action = random.sample(action_list,1)[0]
+                    action = random.randrange(0,2)
                 else :
                     action = np.argmax(mainDQN.predict(state))
                 # Return_value is tuple
                 # Return_value = (new_state, reward, done)
-                Return_value = game.step(action)
-                if Return_value == None :
-                    break
-                else :
-                    new_state = Return_value[0]/3
-                    reward = Return_value[1]
-                    done = Return_value[2]
-
+                # new_state,reward,done = game.step(action,speed = 10)
+                new_state, reward, done = game.step(action,speed = 10)
                 # Add play data to replay_buffer
                 replay_buffer.append((state,action,reward,new_state,done))
                 if len(replay_buffer) > REPLAY_MEMORY :
                     replay_buffer.popleft()
                 state = new_state
                 step_count += 1
+                if step_count > 10000 :
+                    break
                 # For blocking infinite loop
             print("Episode : {} steps : {}".format(episode,step_count))
-
-            if step_count > 30000 :
-                pass
+            print(reward)
 
             # At every cycle(10 episode), it make random batch data from replay buffer.
             # This algorithm is need for generalization.
             if (episode % 10 == 0) & (episode >= 10):
                 for _ in range(50) :
-                    minibatch = random.sample(replay_buffer,50)
+                    minibatch = random.sample(replay_buffer,8)
                     loss,_ = DQN.replay_train(mainDQN,targetDQN,minibatch,dis = 0.9)
                 print("Loss : ",loss)
                 # run copy_ops object
@@ -853,8 +915,8 @@ def train () :
         save_file = 'model_folder/model.ckpt'
         saver = tf.train.Saver()
         saver.save(sess,save_file)
-main()
-#train()
+# main()
+train()
 
 
 

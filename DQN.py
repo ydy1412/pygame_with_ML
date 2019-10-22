@@ -16,42 +16,30 @@ class DQN :
 
         self.build_network()
 
-    def  build_network(self,h_size = 30,l_rate = 0.1):
-        with tf.variable_scope("input", reuse=tf.AUTO_REUSE):
-            self._X = tf.placeholder(tf.float32,[None,40,30,1])
-            self._X_reshape = tf.reshape(self._X,shape = [-1,40,30,1])
-            self._Y = tf.placeholder(shape=[None, self.output_size], dtype=tf.float32)
-        # with tf.variable_scope("con1", reuse=tf.AUTO_REUSE):
-        #     self.conv1 = tf.layers.conv2d(self._X_reshape ,filters = 64,kernel_size = 3,strides = 1,
-        #                              padding = 'SAME',activation = tf.nn.relu)
-        # with tf.variable_scope("pool1", reuse=tf.AUTO_REUSE):
-        #     self.pool1 = tf.nn.max_pool(self.conv1,ksize = [1,2,2,1],strides = [1,2,2,1],padding = 'VALID')
-        # with tf.variable_scope("conv2", reuse=tf.AUTO_REUSE):
-        #     self.conv2 = tf.layers.conv2d(self.pool1,filters = 32,kernel_size = 3,strides =  1,
-        #                                   padding = 'SAME',activation = tf.nn.relu)
-        with tf.variable_scope("poo2", reuse=tf.AUTO_REUSE):
-            # self.pool2 = tf.nn.max_pool(self.conv1,ksize = [1,2,2,1],strides = [1,2,2,1],padding = 'VALID')
-            self.pool_flat = tf.layers.flatten(self._X)
+    def  build_network(self,l_rate = 0.1):
+        with tf.variable_scope(self.net_name):
+            self._X = tf.placeholder(tf.float32,[None,self.input_size])
 
-        with tf.variable_scope("fc", reuse=tf.AUTO_REUSE):
-            self.fc1 = tf.layers.dense(self.pool_flat,256,activation = tf.nn.relu)
-            self.fc2 = tf.layers.dense(self.fc1, 40, activation=tf.nn.relu)
+            W1 = tf.get_variable("W1",shape = [self.input_size,100],initializer=tf.contrib.layers.xavier_initializer())
+            # b1 = tf.get_variable("B1",shape = [1,100],initializer= tf.contrib.layers.xavier_initializer())
+            layer1 = tf.nn.tanh(tf.matmul(self._X, W1))
+            W2 = tf.get_variable("W2",shape = [100,50],initializer=tf.contrib.layers.xavier_initializer())
+            # b2 = tf.get_variable("B2", shape=[1,50],initializer= tf.contrib.layers.xavier_initializer())
+            layer2 = tf.nn.tanh(tf.matmul(layer1, W2))
+            W3 = tf.get_variable("W3",shape = [50,self.output_size],initializer=tf.contrib.layers.xavier_initializer())
+            self._Qpred = tf.matmul(layer2,W3)
 
-        with tf.variable_scope("output", reuse=tf.AUTO_REUSE):
-            self.logits = tf.layers.dense(self.fc2,self.output_size)
+        self._Y = tf.placeholder(shape=[None, self.output_size], dtype=tf.float32)
 
-        with tf.variable_scope("train", reuse=tf.AUTO_REUSE):
-            self._loss = tf.reduce_mean(tf.square(self._Y-self.logits))
-            self.optimizer = tf.train.AdamOptimizer(learning_rate=l_rate)
-            self._training_op = self.optimizer.minimize(self._loss)
+        self._loss = tf.reduce_mean(tf.square(self._Y-self._Qpred))
+        self._train = tf.train.AdamOptimizer(learning_rate=l_rate).minimize(self._loss)
 
     def predict(self,state):
-        x = np.reshape(state,[-1,40,30,1])
-        return self.session.run(self.logits,feed_dict= {self._X : x})
+        x = np.reshape(state,[1,self.input_size])
+        return self.session.run(self._Qpred,feed_dict= {self._X : x})
 
     def update(self , x_stack, y_stack):
-        x_stack = np.reshape(x_stack, [-1, 40, 30, 1])
-        return self.session.run([self._loss,self._training_op],feed_dict ={self._X:x_stack,self._Y :y_stack})
+        return self.session.run([self._loss,self._train],feed_dict ={self._X:x_stack,self._Y :y_stack})
 
 # For batch train.
 def replay_train(mainDQN,targetDQN,train_batch,dis):
