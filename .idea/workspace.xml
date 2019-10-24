@@ -4,7 +4,8 @@
     <list default="true" id="da039539-f601-4ff2-8f5b-7525890ad533" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DQN.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQN.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gym_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gym_test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/images.jpg" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/model_folder/model.ckpt.data-00000-of-00001" beforeDir="false" afterPath="$PROJECT_DIR$/model_folder/model.ckpt.data-00000-of-00001" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model_folder/model.ckpt.index" beforeDir="false" afterPath="$PROJECT_DIR$/model_folder/model.ckpt.index" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model_folder/model.ckpt.meta" beforeDir="false" afterPath="$PROJECT_DIR$/model_folder/model.ckpt.meta" afterDir="false" />
@@ -32,15 +33,16 @@
   <component name="ProjectId" id="1S2SBmOgUzQrDGTfyuf9djQlva5" />
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/img" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
+    <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\acorn\Desktop\pygame\img" />
       <recent name="C:\Users\acorn\Desktop\pygame" />
     </key>
-    <key name="MoveFile.RECENT_KEYS">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\acorn\Desktop\pygame_RL\img" />
       <recent name="C:\Users\acorn\Desktop\pygame\img" />
       <recent name="C:\Users\acorn\Desktop\pygame" />
     </key>
@@ -57,7 +59,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.pygame_ML">
+  <component name="RunManager" selected="Python.pygame_ML (1)">
     <configuration name="gym" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pygame" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -92,6 +94,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/gym_test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="load_weight" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="pygame" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/load_weight.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -141,11 +164,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.pygame_ML" />
-        <item itemvalue="Python.gym_test" />
         <item itemvalue="Python.pygame_ML (1)" />
-        <item itemvalue="Python.gym" />
         <item itemvalue="Python.pygame_ML" />
+        <item itemvalue="Python.load_weight" />
+        <item itemvalue="Python.gym_test" />
+        <item itemvalue="Python.gym" />
       </list>
     </recent_temporary>
   </component>
@@ -180,12 +203,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pygame_ML.py</url>
-          <line>244</line>
+          <line>235</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pygame_ML.py</url>
-          <line>286</line>
+          <line>277</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -195,22 +218,22 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pygame_ML.py</url>
-          <line>93</line>
+          <line>94</line>
           <option name="timeStamp" value="10" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pygame_ML.py</url>
-          <line>269</line>
+          <line>260</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pygame_ML.py</url>
-          <line>362</line>
+          <line>353</line>
           <option name="timeStamp" value="12" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pygame_ML.py</url>
-          <line>839</line>
+          <line>842</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
