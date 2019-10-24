@@ -1,7 +1,10 @@
-version
-tensorflow = 1.14.0
-python = 3.7.0
+python = 3.7.4
+numpy = 1.17.3
 pygame = 1.9.6
-numpy = 1.17.2
+neat-python = 0.92
+neat = 0.4.1
+graphviz = 0.13
+matplotlib = 3.1.1
+wxpython = 4.0.6
 
-pygame_ML.py is a main file.
+run  > python GUI_file.py
