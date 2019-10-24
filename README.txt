@@ -8,4 +8,4 @@ matplotlib = 3.1.1
 wxpython = 4.0.6
 
 run  > python GUI_file.py
-train > python GUI_file.py train
+train > python mygame_Neat.py train
