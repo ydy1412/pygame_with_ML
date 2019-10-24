@@ -1,11 +1,10 @@
 import pygame as pg
 import random
 import os
-import time
 import neat
-import visualize
 import pickle
 import numpy as np
+import sys
 pg.font.init()  # init font
 
 BLACK = (0,0,0)
@@ -24,10 +23,10 @@ DRAW_LINES = False
 screen = pg.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pg.display.set_caption("Flappy Bird")
 
-player_img = pg.transform.scale(pg.image.load(os.path.join("imgs","space-invaders.png")).convert_alpha(),(20,20))
-meteor_img = pg.transform.scale(pg.image.load(os.path.join("imgs","pacman.png")).convert_alpha(),(20,20))
-feed_img = pg.transform.scale(pg.image.load(os.path.join("imgs","star.png")).convert_alpha(),(20,20))
-base_img = pg.transform.scale(pg.image.load(os.path.join("imgs","images.jpg")).convert_alpha(), (800, 600))
+player_img = pg.transform.scale(pg.image.load(os.path.join("img","space-invaders.png")).convert_alpha(),(20,20))
+meteor_img = pg.transform.scale(pg.image.load(os.path.join("img","pacman.png")).convert_alpha(),(20,20))
+feed_img = pg.transform.scale(pg.image.load(os.path.join("img","star.png")).convert_alpha(),(20,20))
+base_img = pg.transform.scale(pg.image.load(os.path.join("img","images.jpg")).convert_alpha(), (800, 600))
 
 gen = 0
 
@@ -150,27 +149,34 @@ def draw_window(screen, players, meteors, feed, score, gen):
     """
     if gen == 0:
         gen = 1
+    elif gen == None :
+        pass
     screen.blit(base_img, (0,0))
 
     for meteor in meteors:
         meteor.draw(screen)
 
     feed.draw(screen)
-    for player in players:
-        # draw bird
-        player.draw(screen)
+    if type(players) == list :
+        for player in players:
+            # draw bird
+            player.draw(screen)
+    else :
+        players.draw(screen)
 
     # score
     score_label = STAT_FONT.render("Score: " + str(score),1,(255,255,255))
     screen.blit(score_label, (WIN_WIDTH - score_label.get_width() - 15, 10))
 
     # generations
-    score_label = STAT_FONT.render("Gens: " + str(gen-1),1,(255,255,255))
-    screen.blit(score_label, (10, 10))
+    if gen != None :
+        score_label = STAT_FONT.render("Gens: " + str(gen-1),1,(255,255,255))
+        screen.blit(score_label, (10, 10))
 
     # alive
-    score_label = STAT_FONT.render("Alive: " + str(len(players)),1,(255,255,255))
-    screen.blit(score_label, (10, 50))
+    if type(players) == list:
+        score_label = STAT_FONT.render("Alive: " + str(len(players)),1,(255,255,255))
+        screen.blit(score_label, (10, 50))
 
     pg.display.update()
 
@@ -258,7 +264,6 @@ def eval_genomes(genomes, config):
                     ge.pop(players.index(player))
                     players.remove(player)
 
-        add_pipe = False
         for meteor in meteors:
             meteor.y += 20
             # check for collision
@@ -275,18 +280,210 @@ def eval_genomes(genomes, config):
                 for genome in ge:
                     genome.fitness += 5
 
+
         draw_window(win, players, meteors, feed, score, gen)
 
         # break if score gets large enough
-        if score == 100:
-            pickle.dump(nets[0],open("score100.pickle", "wb"))
-        elif score == 200 :
-            pickle.dump(nets[0], open("score500.pickle", "wb"))
-        elif score == 300 :
-            pickle.dump(nets[0], open("score1000.pickle", "wb"))
-        elif score == 500 :
-            pickle.dump(nets[0], open("score5000.pickle", "wb"))
-            break
+        if len(nets) == 1 :
+            if score == 100:
+                pickle.dump(nets[0], open("./model_folder/score_100.pickle", "wb"))
+            elif score == 200:
+                pickle.dump(nets[0], open("./model_folder/score_200.pickle", "wb"))
+            elif score == 500:
+                pickle.dump(nets[0], open("./model_folder/score_500.pickle", "wb"))
+            elif score == 800:
+                pickle.dump(nets[0], open("./model_folder/score_800.pickle", "wb"))
+            elif score == 1500 :
+                pickle.dump(nets[0], open("./model_folder/score_1500.pickle", "wb"))
+            elif score > 2000 :
+                pickle.dump(nets[0], open("./model_folder/score_master.pickle", "wb"))
+                break
+
+
+def See_AI_play(model):
+    global screen
+    win = screen
+    meteors = []
+    score = 0
+
+    clock = pg.time.Clock()
+    player = Player(390,580)
+    run = True
+    pause = False
+    feed = Feed()
+    show_retry = False
+    while run :
+        clock.tick(30)
+        for i in range(random.randint(0, 1)):
+            meteors.append(Meteor())
+        for event in pg.event.get():
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_RETURN:
+                    pause = True
+                    while pause:
+                        for event in pg.event.get():
+                            if event.type == pg.KEYDOWN:
+                                if event.key == pg.K_RETURN:
+                                    pause = False
+                            if event.type == pg.QUIT:
+                                pg.quit()
+                                quit()
+
+                        # gameDisplay.fill(white)
+
+                        pg.display.update()
+                        clock.tick(15)
+            elif event.type == pg.QUIT:
+                run = False
+                pg.quit()
+                quit()
+                break
+        input = player.detect_meteor(meteors)
+
+            # send bird location, top pipe location and bottom pipe location and determine from network whether to jump or not
+        output = model.activate((input))
+
+        if output[0] > 0:  # we use a tanh activation function so result will be between -1 and 1. if over 0.5 jump
+            player.x += player.x_speed
+        else :
+            player.x -= player.x_speed
+
+        if player.y + player.image.get_height() >= WIN_HEIGHT or player.y <= 0:
+            if player.x + player.image.get_width() >= WIN_WIDTH or player.x <= 0 :
+                show_retry = True
+        for meteor in meteors:
+            meteor.y += 20
+            # check for collision
+            if meteor.collide(player):
+                show_retry = True
+            if meteor.y > WIN_HEIGHT:
+                meteors.remove(meteor)
+                score += 1
+        draw_window(win, player, meteors, feed, score, None)
+        if show_retry == True :
+            win.fill(WHITE)
+            Text_box_list = [render_text("GAME OVER", 400, 300),
+                             render_text("SCORE :" + str(score), x=600, y=50, font_size=30,
+                                         color=BLACK)]
+            show_retry = Show_menu(Text_box_list=Text_box_list)
+            meteors = []
+            player = Player(390, 580, sensor=True)
+            score = 0
+
+
+def render_text(text, x, y, font_size=115, color=BLACK):
+    def text_objects(text, font, color=BLACK):
+        textSurface = font.render(text, True, color)
+        return textSurface, textSurface.get_rect()
+
+    LargeText = pg.font.Font("freesansbold.ttf", font_size)
+    Textsurf, TextRect = text_objects(text, LargeText, color=color)
+    TextRect.center = (x, y)
+    return Textsurf, TextRect
+
+def Show_menu(show_intro=True, Text_box_list=[], done=False):
+    global screen
+    win = screen
+    while show_intro:
+        win.fill(WHITE)
+        for Text_box in Text_box_list:
+            win.blit(Text_box[0], Text_box[1])
+        for event in pg.event.get():
+            # if i click close button(quit), loop ended.
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_RETURN:
+                    show_intro = False
+                    return False
+            if event.type == pg.QUIT:
+                pg.quit()
+            pg.display.update()
+
+def play_game() :
+
+    global screen
+    win = screen
+    meteors = []
+    score = 0
+    pg.font.init()  # init font
+    clock = pg.time.Clock()
+    player = Player(390,580,sensor = False)
+    run = True
+    pause = False
+    feed = Feed()
+    show_intro = True
+    show_retry = False
+    key_type = None
+    key_state = False
+    while run :
+        clock.tick(30)
+        if show_intro == True :
+            text_box_list = [render_text("GAME START",400,300)]
+            show_intro = Show_menu(show_intro, Text_box_list=text_box_list)
+        for i in range(random.randint(0, 1)):
+            meteors.append(Meteor())
+        for event in pg.event.get():
+            if event.type == pg.KEYDOWN:
+                key_state = True
+                if event.key == pg.K_RIGHT:
+                    key_type = 1
+                elif event.key == pg.K_LEFT:
+                    key_type = 0
+
+
+                elif event.key == pg.K_RETURN:
+                    pause = True
+                    while pause:
+                        for event in pg.event.get():
+                            if event.type == pg.KEYDOWN:
+                                if event.key == pg.K_RETURN:
+                                    pause = False
+                            if event.type == pg.QUIT:
+                                pg.quit()
+                                quit()
+
+                        # gameDisplay.fill(white)
+
+                        pg.display.update()
+                        clock.tick(15)
+            elif event.type == pg.KEYUP :
+                key_state = False
+            elif event.type == pg.QUIT:
+                run = False
+                pg.quit()
+                quit()
+                break
+        if  key_state == True:
+            if key_type == 1:
+                player.x += 20
+            elif key_type == 0:
+                player.x -= 20
+            else:
+                pass
+
+
+
+        if player.y + player.image.get_height() >= WIN_HEIGHT or player.y <= 0:
+            if player.x + player.image.get_width() >= WIN_WIDTH or player.x <= 0 :
+                show_retry = True
+        for meteor in meteors:
+            meteor.y += 20
+            # check for collision
+            if meteor.collide(player):
+                show_retry = True
+            if meteor.y > WIN_HEIGHT:
+                meteors.remove(meteor)
+                score += 1
+        if show_retry == True :
+            win.fill(WHITE)
+            Text_box_list = [render_text("GAME OVER",400,300),
+                             render_text("SCORE :" + str(score), x= 600, y=50, font_size=30,
+                                              color=BLACK)]
+            show_retry = Show_menu(Text_box_list=Text_box_list)
+            meteors = []
+            player = Player(390,580,sensor = False)
+            score = 0
+        draw_window(win, player, meteors, feed, score, None)
+
 
 
 def run(config_file):
@@ -310,6 +507,7 @@ def run(config_file):
 
     # Run for up to 50 generations.
     winner = p.run(eval_genomes, 100)
+    print(winner)
 
     # show final stats
     print('\nBest genome:\n{!s}'.format(winner))
@@ -319,6 +517,14 @@ if __name__ == '__main__':
     # Determine path to configuration file. This path manipulation is
     # here so that the script will run successfully regardless of the
     # current working directory.
-    local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, 'config-feedforward.txt')
-    run(config_path)
+    if sys.argv[1] == 'AI' :
+        model_file = './model_folder/score'+sys.argv[2]+'.pickle'
+        with open(model_file,'rb') as f :
+            model = pickle.load(f)
+        print(model)
+        See_AI_play(model)
+    elif sys.argv[1] == 'train' :
+        local_dir = os.path.dirname(__file__)
+        config_path = os.path.join(local_dir, 'config-feedforward.txt')
+        run(config_path)
+
