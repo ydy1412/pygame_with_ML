@@ -518,7 +518,7 @@ if __name__ == '__main__':
     # here so that the script will run successfully regardless of the
     # current working directory.
     if sys.argv[1] == 'AI' :
-        model_file = './model_folder/score'+sys.argv[2]+'.pickle'
+        model_file = './model_folder/score_'+sys.argv[2]+'.pickle'
         with open(model_file,'rb') as f :
             model = pickle.load(f)
         print(model)
