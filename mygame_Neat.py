@@ -21,7 +21,7 @@ END_FONT = pg.font.SysFont("comicsans", 70)
 DRAW_LINES = False
 
 screen = pg.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-pg.display.set_caption("Flappy Bird")
+pg.display.set_caption("Neat test")
 
 player_img = pg.transform.scale(pg.image.load(os.path.join("img","space-invaders.png")).convert_alpha(),(20,20))
 meteor_img = pg.transform.scale(pg.image.load(os.path.join("img","pacman.png")).convert_alpha(),(20,20))
@@ -74,7 +74,7 @@ class Player():
                     # distance between point and line.
                     d = abs(sensor_vector[0] * (meteor.x - self.x) + sensor_vector[1] * (-self.y + meteor.y)) / \
                         np.sqrt(sensor_vector[0] ** 2 + sensor_vector[1] ** 2)
-                    if d <= 20:
+                    if d <= 14:
                         self.sensor_array[i] = True
                         self.sensor_value[i] = 1-distance_from_player / 300
 
@@ -237,13 +237,23 @@ def eval_genomes(genomes, config):
                 run = False
                 pg.quit()
                 quit()
-                break
+                break                                                           # pipe on the screen for neural network input
 
-        meteor_ind = 0
-        if len(players) > 0:
-            if len(meteors) > 1 and players[0].x > meteors[0].x + meteors[0].image.get_width():  # determine whether to use the first or second
-                pipe_ind = 1                                                                 # pipe on the screen for neural network input
+        for meteor in meteors:
+            meteor.y += 20
+            # check for collision
+            for player in players:
+                if meteor.collide(player):
+                    ge[players.index(player)].fitness -= 1
+                    nets.pop(players.index(player))
+                    ge.pop(players.index(player))
+                    players.pop(players.index(player))
 
+            if meteor.y > WIN_HEIGHT:
+                meteors.remove(meteor)
+                score += 1
+                for genome in ge:
+                    genome.fitness += 5
         for x, player in enumerate(players):  # give each bird a fitness of 0.1 for each frame it stays alive
             ge[x].fitness += 0.1
             input = player.detect_meteor(meteors)
@@ -263,22 +273,6 @@ def eval_genomes(genomes, config):
                     nets.pop(players.index(player))
                     ge.pop(players.index(player))
                     players.remove(player)
-
-        for meteor in meteors:
-            meteor.y += 20
-            # check for collision
-            for player in players:
-                if meteor.collide(player):
-                    ge[players.index(player)].fitness -= 1
-                    nets.pop(players.index(player))
-                    ge.pop(players.index(player))
-                    players.pop(players.index(player))
-
-            if meteor.y > WIN_HEIGHT:
-                meteors.remove(meteor)
-                score += 1
-                for genome in ge:
-                    genome.fitness += 5
 
 
         draw_window(win, players, meteors, feed, score, gen)
@@ -312,10 +306,34 @@ def See_AI_play(model):
     pause = False
     feed = Feed()
     show_retry = False
+    for i in range(random.randint(0, 1)):
+        meteors.append(Meteor())
+
     while run :
         clock.tick(30)
-        for i in range(random.randint(0, 1)):
-            meteors.append(Meteor())
+
+        for meteor in meteors:
+            meteor.y += 20
+            # check for collision
+            if meteor.collide(player):
+                show_retry = True
+            if meteor.y > WIN_HEIGHT:
+                meteors.remove(meteor)
+                score += 1
+
+        input = player.detect_meteor(meteors)
+            # send bird location, top pipe location and bottom pipe location and determine from network whether to jump or not
+        output = model.activate((input))
+        if output[0] > 0:  # we use a tanh activation function so result will be between -1 and 1. if over 0.5 jump
+            player.x += player.x_speed
+        else :
+            player.x -= player.x_speed
+
+        if player.y + player.image.get_height() >= WIN_HEIGHT or player.y <= 0:
+            if player.x + player.image.get_width() >= WIN_WIDTH or player.x <= 0 :
+                show_retry = True
+        draw_window(win, player, meteors, feed, score, None)
+
         for event in pg.event.get():
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_RETURN:
@@ -338,28 +356,10 @@ def See_AI_play(model):
                 pg.quit()
                 quit()
                 break
-        input = player.detect_meteor(meteors)
 
-            # send bird location, top pipe location and bottom pipe location and determine from network whether to jump or not
-        output = model.activate((input))
+        for i in range(random.randint(0, 1)):
+            meteors.append(Meteor())
 
-        if output[0] > 0:  # we use a tanh activation function so result will be between -1 and 1. if over 0.5 jump
-            player.x += player.x_speed
-        else :
-            player.x -= player.x_speed
-
-        if player.y + player.image.get_height() >= WIN_HEIGHT or player.y <= 0:
-            if player.x + player.image.get_width() >= WIN_WIDTH or player.x <= 0 :
-                show_retry = True
-        for meteor in meteors:
-            meteor.y += 20
-            # check for collision
-            if meteor.collide(player):
-                show_retry = True
-            if meteor.y > WIN_HEIGHT:
-                meteors.remove(meteor)
-                score += 1
-        draw_window(win, player, meteors, feed, score, None)
         if show_retry == True :
             win.fill(WHITE)
             Text_box_list = [render_text("GAME OVER", 400, 300),
@@ -369,7 +369,6 @@ def See_AI_play(model):
             meteors = []
             player = Player(390, 580, sensor=True)
             score = 0
-
 
 def render_text(text, x, y, font_size=115, color=BLACK):
     def text_objects(text, font, color=BLACK):

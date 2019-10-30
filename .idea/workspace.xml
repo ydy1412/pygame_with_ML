@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="da039539-f601-4ff2-8f5b-7525890ad533" name="Default Changelist" comment="" />
+    <list default="true" id="da039539-f601-4ff2-8f5b-7525890ad533" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GUI_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI_file.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_folder/score_100.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/model_folder/score_100.pickle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_folder/score_200.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/model_folder/score_200.pickle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mygame_Neat.py" beforeDir="false" afterPath="$PROJECT_DIR$/mygame_Neat.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,7 +27,7 @@
   <component name="ProjectId" id="1S2SBmOgUzQrDGTfyuf9djQlva5" />
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$/YDY_FOLDER/New_neuron_Generator_Gui" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -196,6 +202,10 @@
           <url>file://$PROJECT_DIR$/mygame_Neat.py</url>
           <line>183</line>
           <option name="timeStamp" value="16" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/GUI_file.py</url>
+          <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

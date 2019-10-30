@@ -51,7 +51,8 @@ class StartFrame(wx.Frame):
         self.m_staticText2.Wrap(-1)
         bSizer3.Add(self.m_staticText2, 0, wx.ALIGN_CENTER | wx.ALL, 20)
 
-        agent_cb= [u"100 score agent", u"200 score agent", u"500 score agent", u"800 score agent"]
+        agent_cb= [u"100 score agent", u"200 score agent", u"500 score agent",
+                   u"800 score agent", u"1500 score agent", u"3000 score agent"]
         self.m_comboBox1 = wx.ComboBox(self.m_panel4, wx.ID_ANY, u"100 score agent", wx.DefaultPosition, wx.DefaultSize,
                                        agent_cb, 0)
         self.m_comboBox1.SetSelection(0)
