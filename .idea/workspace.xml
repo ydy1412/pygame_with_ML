@@ -4,8 +4,13 @@
     <list default="true" id="da039539-f601-4ff2-8f5b-7525890ad533" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GUI_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI_file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_folder/score_100.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/model_folder/score_100.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_folder/score_200.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/model_folder/score_200.pickle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config-feedforward.txt" beforeDir="false" afterPath="$PROJECT_DIR$/config-feedforward.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_folder/score_100.pickle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_folder/score_1500.pickle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_folder/score_200.pickle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_folder/score_3000.pickle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_folder/score_500.pickle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_folder/score_800.pickle" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/mygame_Neat.py" beforeDir="false" afterPath="$PROJECT_DIR$/mygame_Neat.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -24,6 +29,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/mygame_Neat.py" root0="SKIP_INSPECTION" />
+  </component>
   <component name="ProjectId" id="1S2SBmOgUzQrDGTfyuf9djQlva5" />
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -31,12 +39,13 @@
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\acorn\Desktop\pygame_RL\img" />
       <recent name="C:\Users\acorn\Desktop\pygame\img" />
       <recent name="C:\Users\acorn\Desktop\pygame" />
     </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\acorn\Desktop\pygame_RL\img" />
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\ydy1412\Desktop\pygame\pygame_with_ML\model_folder" />
       <recent name="C:\Users\acorn\Desktop\pygame\img" />
       <recent name="C:\Users\acorn\Desktop\pygame" />
     </key>
@@ -75,7 +84,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="gym_test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="draw_network" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pygame" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -87,7 +96,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/gym_test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/draw_network.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -162,10 +171,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.GUI_file" />
+        <item itemvalue="Python.draw_network" />
         <item itemvalue="Python.pygame_ML (1)" />
         <item itemvalue="Python.pygame_ML" />
         <item itemvalue="Python.load_weight" />
-        <item itemvalue="Python.gym_test" />
       </list>
     </recent_temporary>
   </component>
@@ -200,12 +209,17 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/mygame_Neat.py</url>
-          <line>183</line>
+          <line>171</line>
           <option name="timeStamp" value="16" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/GUI_file.py</url>
           <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/draw_network.py</url>
+          <line>13</line>
+          <option name="timeStamp" value="18" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

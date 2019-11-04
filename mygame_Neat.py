@@ -5,6 +5,7 @@ import neat
 import pickle
 import numpy as np
 import sys
+import visualizer
 pg.font.init()  # init font
 
 BLACK = (0,0,0)
@@ -29,6 +30,7 @@ feed_img = pg.transform.scale(pg.image.load(os.path.join("img","star.png")).conv
 base_img = pg.transform.scale(pg.image.load(os.path.join("img","images.jpg")).convert_alpha(), (800, 600))
 
 gen = 0
+ge_fitness = [True for i in range(7)]
 
 class Player():
     def __init__(self,x,y,sensor = True):
@@ -84,7 +86,6 @@ class Player():
     def get_mask(self):
         return pg.mask.from_surface(self.image)
 
-
 class Meteor() :
     def __init__(self):
         self.x = 0
@@ -110,8 +111,6 @@ class Meteor() :
             return True
         return False
 
-
-
 class Feed() :
     def __init__(self):
         self.x = 0
@@ -135,18 +134,8 @@ class Feed() :
             return True
         return False
 
-
 def draw_window(screen, players, meteors, feed, score, gen):
-    """
-    draws the windows for the main game loop
-    :param win: pygame window surface
-    :param bird: a Bird object
-    :param pipes: List of pipes
-    :param score: score of the game (int)
-    :param gen: current generation
-    :param pipe_ind: index of closest pipe
-    :return: None
-    """
+
     if gen == 0:
         gen = 1
     elif gen == None :
@@ -180,13 +169,8 @@ def draw_window(screen, players, meteors, feed, score, gen):
 
     pg.display.update()
 
-
 def eval_genomes(genomes, config):
-    """
-    runs the simulation of the current population of
-    birds and sets their fitness based on the distance they
-    reach in the game.
-    """
+
     global screen, gen
     win = screen
     gen += 1
@@ -254,7 +238,7 @@ def eval_genomes(genomes, config):
                 score += 1
                 for genome in ge:
                     genome.fitness += 5
-        for x, player in enumerate(players):  # give each bird a fitness of 0.1 for each frame it stays alive
+        for x, player in enumerate(players):  # give each player a fitness of 0.1 for each frame it stays alive
             ge[x].fitness += 0.1
             input = player.detect_meteor(meteors)
 
@@ -277,22 +261,34 @@ def eval_genomes(genomes, config):
 
         draw_window(win, players, meteors, feed, score, gen)
 
+
         # break if score gets large enough
         if len(nets) == 1 :
-            if score == 100:
-                pickle.dump(nets[0], open("./model_folder/score_100.pickle", "wb"))
-            elif score == 200:
-                pickle.dump(nets[0], open("./model_folder/score_200.pickle", "wb"))
-            elif score == 500:
-                pickle.dump(nets[0], open("./model_folder/score_500.pickle", "wb"))
-            elif score == 800:
-                pickle.dump(nets[0], open("./model_folder/score_800.pickle", "wb"))
-            elif score == 1500 :
-                pickle.dump(nets[0], open("./model_folder/score_1500.pickle", "wb"))
-            elif score > 2000 :
-                pickle.dump(nets[0], open("./model_folder/score_master.pickle", "wb"))
+            if ge[0].fitness > 1000 and ge_fitness[0] == True:
+                print("1000 model")
+                ge_fitness[0] = False
+                pickle.dump(nets[0], open("./model_folder/1000.pickle", "wb"))
+            elif ge[0].fitness > 2000 and  ge_fitness[1] == True:
+                print("2000 model")
+                ge_fitness[1] = False
+                pickle.dump(nets[0], open("./model_folder/2000.pickle", "wb"))
+            elif ge[0].fitness > 4000 and ge_fitness[2] == True:
+                print("4000 model")
+                ge_fitness[2] = False
+                pickle.dump(nets[0], open("./model_folder/4000.pickle", "wb"))
+            elif ge[0].fitness > 6000 and ge_fitness[3] == True:
+                print("6000 model")
+                ge_fitness[3] = False
+                pickle.dump(nets[0], open("./model_folder/6000.pickle", "wb"))
+            elif ge[0].fitness > 10000 and ge_fitness[4] == True:
+                print("10000 model")
+                ge_fitness[4] = False
+                pickle.dump(nets[0], open("./model_folder/10000.pickle", "wb"))
+            elif ge[0].fitness > 20000 and ge_fitness[5] == True:
+                print("20000 model")
+                ge_fitness[5] = False
+                pickle.dump(nets[0], open("./model_folder/master.pickle", "wb"))
                 break
-
 
 def See_AI_play(model):
     global screen
@@ -322,6 +318,7 @@ def See_AI_play(model):
                 score += 1
 
         input = player.detect_meteor(meteors)
+        draw_window(win, player, meteors, feed, score, None)
             # send bird location, top pipe location and bottom pipe location and determine from network whether to jump or not
         output = model.activate((input))
         if output[0] > 0:  # we use a tanh activation function so result will be between -1 and 1. if over 0.5 jump
@@ -332,7 +329,6 @@ def See_AI_play(model):
         if player.y + player.image.get_height() >= WIN_HEIGHT or player.y <= 0:
             if player.x + player.image.get_width() >= WIN_WIDTH or player.x <= 0 :
                 show_retry = True
-        draw_window(win, player, meteors, feed, score, None)
 
         for event in pg.event.get():
             if event.type == pg.KEYDOWN:
@@ -483,41 +479,35 @@ def play_game() :
             score = 0
         draw_window(win, player, meteors, feed, score, None)
 
-
-
 def run(config_file):
-    """
-    runs the NEAT algorithm to train a neural network to play flappy bird.
-    :param config_file: location of config file
-    :return: None
-    """
+
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_file)
 
     # Create the population, which is the top-level object for a NEAT run.
     p = neat.Population(config)
-
-    # Add a stdout reporter to show progress in the terminal.
+    #
+    # # Add a stdout reporter to show progress in the terminal.
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    #p.add_reporter(neat.Checkpointer(5))
-
-    # Run for up to 50 generations.
+    p.add_reporter(neat.Checkpointer(20))
+    # #p.add_reporter(neat.Checkpointer(5))
     winner = p.run(eval_genomes, 100)
-    print(winner)
+    pickle.dump(winner, open("./model_folder/master.pickle", "wb"))
+    # winner_net = neat.nn.FeedForwardNetwork.create(winner,config)
+    # visualizer.draw_net(config,winner,filename = "winner's network",view = True)
 
     # show final stats
     print('\nBest genome:\n{!s}'.format(winner))
-
 
 if __name__ == '__main__':
     # Determine path to configuration file. This path manipulation is
     # here so that the script will run successfully regardless of the
     # current working directory.
     if sys.argv[1] == 'AI' :
-        model_file = './model_folder/score_'+sys.argv[2]+'.pickle'
+        model_file = os.getcwd() + "/model_folder/"+sys.argv[2] +'.pickle'
         with open(model_file,'rb') as f :
             model = pickle.load(f)
         print(model)
@@ -526,4 +516,14 @@ if __name__ == '__main__':
         local_dir = os.path.dirname(__file__)
         config_path = os.path.join(local_dir, 'config-feedforward.txt')
         run(config_path)
+    if sys.argv[1] == "winner" :
+        local_dir = os.path.dirname(__file__)
+        config_path = os.path.join(local_dir, 'config-feedforward.txt')
+        config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                                    neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                                    config_path)
+        with open(os.getcwd() + "/model_folder/master.pickle",'rb') as f :
+            winner = pickle.load(f)
+        model_file = neat.nn.FeedForwardNetwork.create(winner,config)
+        pickle.dump(model_file, open("./model_folder/master.pickle", "wb"))
 

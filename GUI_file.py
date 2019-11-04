@@ -51,8 +51,8 @@ class StartFrame(wx.Frame):
         self.m_staticText2.Wrap(-1)
         bSizer3.Add(self.m_staticText2, 0, wx.ALIGN_CENTER | wx.ALL, 20)
 
-        agent_cb= [u"100 score agent", u"200 score agent", u"500 score agent",
-                   u"800 score agent", u"1500 score agent", u"3000 score agent"]
+        agent_cb= [u"1000 score agent", u"2000 score agent", u"4000 score agent",
+                   u"6000 score agent", u"10000 score agent", u"master score agent"]
         self.m_comboBox1 = wx.ComboBox(self.m_panel4, wx.ID_ANY, u"100 score agent", wx.DefaultPosition, wx.DefaultSize,
                                        agent_cb, 0)
         self.m_comboBox1.SetSelection(0)
@@ -76,7 +76,7 @@ class StartFrame(wx.Frame):
         play_game()
     def simulate(self,evt):
         agent_number = self.m_comboBox1.GetValue()[:-12]
-        model_file = "./model_folder/score_"+agent_number+".pickle"
+        model_file = "./model_folder/"+agent_number+".pickle"
         with open(model_file,'rb') as f :
             model = pickle.load(f)
         See_AI_play(model)
