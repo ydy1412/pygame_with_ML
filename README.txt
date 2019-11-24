@@ -12,5 +12,5 @@ wxpython = 4.0.6
 # GUI_file.py is the program that you can see the environment and performance of each AI pilot.
 run  > python GUI_file.py
 
-# By typing "python magame_Neat.py train", You can see the training process.
+# By typing "python mygame_Neat.py train", You can see the training process.
 train > python mygame_Neat.py train
